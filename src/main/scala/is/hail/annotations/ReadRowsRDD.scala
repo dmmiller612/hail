@@ -271,7 +271,7 @@ class RichRDDUnsafeRow(val rdd: RDD[UnsafeRow]) extends AnyVal {
 
     hadoopConf.mkDir(path + "/rowstore")
 
-    val sHadoopConfBc = sc.broadcast(new SerializableHadoopConfiguration(hadoopConf))
+    val sHadoopConf = new SerializableHadoopConfiguration(hadoopConf)
 
     val nPartitions = rdd.partitions.length
     val d = digitsNeeded(nPartitions)
@@ -284,7 +284,7 @@ class RichRDDUnsafeRow(val rdd: RDD[UnsafeRow]) extends AnyVal {
       assert(is.length <= d)
       val pis = StringUtils.leftPad(is, d, "0")
 
-      sHadoopConfBc.value.value.writeLZ4DataFile(path + "/rowstore/part-" + pis,
+      sHadoopConf.value.writeLZ4DataFile(path + "/rowstore/part-" + pis,
         64 * 1024,
         LZ4Factory.fastestInstance().highCompressor()) { out =>
         val en = new Encoder(out)
